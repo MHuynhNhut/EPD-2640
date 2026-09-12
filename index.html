@@ -830,7 +830,26 @@
     <!-- utils.js not in repo -->
 
 <style id="todo-module-style">
-.todo-shell{display:grid;grid-template-columns:minmax(320px,1fr) minmax(300px,520px);gap:18px}.todo-card{background:#fff;border:1px solid #dbe2ea;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.todo-form{display:grid;grid-template-columns:1fr 150px 170px auto;gap:8px}.todo-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.todo-list{display:grid;gap:8px}.todo-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid #dde3ea;border-radius:10px;padding:10px}.todo-row.done .todo-title{text-decoration:line-through;color:#77808c}.todo-title{font-weight:700}.todo-meta{font-size:12px;color:#667085}.todo-actions{display:flex;gap:5px}.todo-actions button{width:auto;min-height:36px;padding:6px 10px;margin:0}.todo-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.todo-stat{padding:10px;border:1px solid #dbe2ea;border-radius:10px;text-align:center}.todo-stat strong{display:block;font-size:24px}.todo-preview{width:100%;height:auto;border:5px solid #222;background:#fff;image-rendering:pixelated}.todo-empty{text-align:center;color:#667085;padding:24px;border:1px dashed #bbb;border-radius:10px}.todo-note{font-size:13px;color:#526174;background:#eef4ff;padding:10px;border-radius:8px;margin-top:10px}@media(max-width:900px){.todo-shell{grid-template-columns:1fr}.todo-form{grid-template-columns:1fr 1fr}.todo-form input:first-child{grid-column:1/-1}}@media(max-width:520px){.todo-form,.todo-stats{grid-template-columns:1fr 1fr}.todo-row{grid-template-columns:auto 1fr}.todo-actions{grid-column:2}}
+.todo-shell{display:grid;grid-template-columns:minmax(320px,1fr) minmax(300px,520px);gap:18px}.todo-card{background:#fff;border:1px solid #dbe2ea;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.todo-form{display:grid;grid-template-columns:1fr 150px 170px auto;gap:8px}.todo-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.todo-list{display:grid;gap:8px}.todo-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid #dde3ea;border-radius:10px;padding:10px}.todo-row.done .todo-title{text-decoration:line-through;color:#77808c}.todo-title{font-weight:700}.todo-meta{font-size:12px;color:#667085}.todo-actions{display:flex;gap:5px}.todo-actions button{width:auto;min-height:36px;padding:6px 10px;margin:0}.todo-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.todo-stat{padding:10px;border:1px solid #dbe2ea;border-radius:10px;text-align:center}.todo-stat strong{display:block;font-size:24px}.todo-preview{display:block;width:auto;max-width:100%;max-height:72vh;height:auto;margin:0 auto;border:5px solid #222;background:#fff;image-rendering:pixelated}.todo-empty{text-align:center;color:#667085;padding:24px;border:1px dashed #bbb;border-radius:10px}.todo-note{font-size:13px;color:#526174;background:#eef4ff;padding:10px;border-radius:8px;margin-top:10px}@media(max-width:900px){.todo-shell{grid-template-columns:1fr}.todo-form{grid-template-columns:1fr 1fr}.todo-form input:first-child{grid-column:1/-1}}@media(max-width:520px){.todo-form,.todo-stats{grid-template-columns:1fr 1fr}.todo-row{grid-template-columns:auto 1fr}.todo-actions{grid-column:2}}
+</style>
+
+<style id="todo-focused-ui">
+/* Focused UI: keep Settings + full Todo List. */
+.tab-button[data-tab="tab-countdown"],
+.tab-button[data-tab="tab-image"],
+#clock-image-tab-button,
+#tab-countdown,
+#tab-image,
+#tab-clock-image,
+.sleep-panel,
+#tab-settings details { display:none !important; }
+.tab-buttons .tab-button { flex:1 1 50%; }
+#tab-settings > h2 { margin-bottom:12px; }
+.focus-note { margin:10px 0; padding:10px 12px; border-radius:8px; background:#eef4ff; color:#294b9b; }
+</style>
+
+<style id="firmware-ota-style">
+.fw-grid{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px}.fw-item{border:1px solid #dbe2ea;border-radius:10px;padding:12px;background:#f8fafc}.fw-item span{display:block;color:#64748b;font-size:12px}.fw-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}.fw-warning{margin:12px 0;padding:12px;border-radius:10px;background:#fff7ed;border:1px solid #fdba74;color:#9a3412}.fw-status{margin-top:12px;padding:12px;border-radius:10px;background:#eef4ff;color:#294b9b;white-space:pre-wrap}.fw-package{margin-top:14px;padding:14px;border:1px solid #dbe2ea;border-radius:10px}.fw-actions{display:flex;flex-wrap:wrap;gap:8px}.fw-actions button{width:auto}.fw-danger{background:#b91c1c}.fw-danger:hover{background:#991b1b}@media(max-width:650px){.fw-grid{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -1183,11 +1202,13 @@
             <button class="tab-button" data-tab="tab-image">Image Transfer</button>
             <button id="clock-image-tab-button" class="tab-button" data-tab="tab-clock-image">Đồng hồ và ảnh</button>
             <button id="todo-tab-button" class="tab-button" data-tab="tab-todo">Todo List</button>
+            <button id="firmware-tab-button" class="tab-button" data-tab="tab-firmware">Firmware & OTA</button>
         </div>
     </div>
 
    
     <div id="tab-settings" class="tab-content active">
+        <div class="focus-note">Giao diện rút gọn: kết nối Bluetooth, cài giờ, Đồng hồ, Lịch và Todo List.</div>
         <h2>E-Paper Bluetooth Controller - Connect device first before setting clock</h2>
         
        
@@ -1466,8 +1487,47 @@
     </div>
 
     
+
+<div id="tab-firmware" class="tab-content">
+  <h2>Thông tin Firmware và OTA</h2>
+  <div class="fw-warning"><strong>Lưu ý:</strong> Trang web chỉ đọc được thông tin mà firmware công bố qua BLE như phiên bản, model, panel và mode. Trang web không thể đọc hoặc sao chép toàn bộ firmware nhị phân đang nằm trong flash của thiết bị.</div>
+  <div class="fw-grid">
+    <div class="fw-item"><span>Thiết bị</span><strong id="fw-device-name">Chưa kết nối</strong></div>
+    <div class="fw-item"><span>Giao thức</span><strong id="fw-protocol">Chưa nhận diện</strong></div>
+    <div class="fw-item"><span>Phiên bản ứng dụng</span><strong id="fw-version">Chưa đọc</strong></div>
+    <div class="fw-item"><span>Model</span><strong id="fw-model">Chưa đọc</strong></div>
+    <div class="fw-item"><span>Panel</span><strong id="fw-panel">Chưa đọc</strong></div>
+    <div class="fw-item"><span>Chế độ hiện tại</span><strong id="fw-mode">Chưa đọc</strong></div>
+  </div>
+  <div class="fw-actions" style="margin-top:14px">
+    <button type="button" onclick="readFirmwareInfo()">Đọc thông tin firmware</button>
+    <button type="button" class="secondary" onclick="exportFirmwareInfo()">Xuất thông tin JSON</button>
+  </div>
+  <div class="fw-package">
+    <h3>Chuẩn bị cập nhật OTA</h3>
+    <input id="ota-package" type="file" accept=".zip,application/zip">
+    <div class="fw-grid">
+      <div class="fw-item"><span>Tên gói</span><strong id="ota-name">Chưa chọn</strong></div>
+      <div class="fw-item"><span>Kích thước</span><strong id="ota-size">0 byte</strong></div>
+    </div>
+    <div class="fw-actions" style="margin-top:12px">
+      <button type="button" onclick="validateOtaPackage()">Kiểm tra gói ZIP</button>
+      <button type="button" class="fw-danger" onclick="enterDfuMode()">Chuyển thiết bị sang DFU</button>
+    </div>
+    <div class="fw-warning">Sau khi thiết bị khởi động vào bootloader, hãy dùng ứng dụng Nordic nRF Connect Device Manager để chọn đúng gói DFU ZIP và hoàn tất cập nhật. Không rút pin trong quá trình cập nhật. Gói ZIP phải đúng MCU, SoftDevice, bootloader và khóa ký của thiết bị.</div>
+  </div>
+  <div id="fw-status" class="fw-status">Sẵn sàng.</div>
+</div>
+
 <div id="tab-todo" class="tab-content">
   <h2>Todo List cho E-Paper</h2>
+  <div class="todo-toolbar">
+    <label for="todo-orientation" style="font-weight:700">Hướng hiển thị:</label>
+    <select id="todo-orientation" style="max-width:220px">
+      <option value="portrait" selected>Dọc</option>
+      <option value="landscape">Ngang</option>
+    </select>
+  </div>
   <div class="todo-shell">
     <section class="todo-card">
       <div class="todo-stats"><div class="todo-stat"><strong id="todo-total">0</strong>Tổng</div><div class="todo-stat"><strong id="todo-done">0</strong>Hoàn tất</div><div class="todo-stat"><strong id="todo-pending">0</strong>Đang chờ</div><div class="todo-stat"><strong id="todo-overdue">0</strong>Quá hạn</div></div>
@@ -2459,6 +2519,8 @@ document.querySelectorAll('.tab-button').forEach(function(btn) {
         const NRF52_SERVICE_UUID = '62750001-d828-918d-fb46-b6c11c675aec';
         const NRF52_CHARACTERISTIC_UUID = '62750002-d828-918d-fb46-b6c11c675aec';
         const NRF52_APP_VERSION_UUID = '62750003-d828-918d-fb46-b6c11c675aec';
+        const NRF52_BUTTONLESS_DFU_SERVICE_UUID = '8ec90001-f315-4f60-9fb8-838830daea50';
+        const NRF52_BUTTONLESS_DFU_CHAR_UUID = '8ec90003-f315-4f60-9fb8-838830daea50';
         const NRF52_CMD_SET_TIME = 0x20;
         const NRF52_CMD_SET_WEEK_START = 0x21;
         const NRF52_CMD_WRITE_IMAGE = 0x30;
@@ -2476,6 +2538,7 @@ document.querySelectorAll('.tab-button').forEach(function(btn) {
         const DA14585_DFU_SERVICE_UUID = '0000221f-0000-1000-8000-00805f9b34fb';
         const SUPPORTED_BLE_SERVICES = [
             NRF52_SERVICE_UUID,
+            NRF52_BUTTONLESS_DFU_SERVICE_UUID,
             DA14585_RXTX_SERVICE_UUID,
             DA14585_LEGACY_SERVICE_UUID,
             DA14585_DFU_SERVICE_UUID
@@ -5498,7 +5561,10 @@ function toggleSwitch(e) {
         const canvas = byId('todo-preview');
         if (!canvas) return;
 
-        const [width, height] = todoTargetSize();
+        const [physicalWidth, physicalHeight] = todoTargetSize();
+        const portrait = byId('todo-orientation') && byId('todo-orientation').value === 'portrait';
+        const width = portrait ? physicalHeight : physicalWidth;
+        const height = portrait ? physicalWidth : physicalHeight;
         canvas.width = width;
         canvas.height = height;
 
@@ -5683,31 +5749,40 @@ function toggleSwitch(e) {
             return;
         }
 
-        const [width, height] = todoTargetSize();
-        if (screenSelector) screenSelector.value = todoScreenMode(width);
+        const [physicalWidth, physicalHeight] = todoTargetSize();
+        const portrait = byId('todo-orientation') && byId('todo-orientation').value === 'portrait';
+        if (screenSelector) screenSelector.value = todoScreenMode(physicalWidth);
 
         window.todoRenderPreview();
         const binaryCanvas = todoBinarizeCanvas(previewCanvas, {
-            threshold: height <= 144 ? 145 : 155,
+            threshold: Math.min(physicalWidth, physicalHeight) <= 144 ? 145 : 155,
             bolden: 0
         });
 
-        transferCanvas.width = width;
-        transferCanvas.height = height;
+        transferCanvas.width = physicalWidth;
+        transferCanvas.height = physicalHeight;
         const transferContext = transferCanvas.getContext('2d', {
             alpha: false,
             willReadFrequently: true
         });
         transferContext.imageSmoothingEnabled = false;
         transferContext.fillStyle = '#ffffff';
-        transferContext.fillRect(0, 0, width, height);
-        transferContext.drawImage(binaryCanvas, 0, 0, width, height);
+        transferContext.fillRect(0, 0, physicalWidth, physicalHeight);
+        if (portrait) {
+            transferContext.save();
+            transferContext.translate(physicalWidth, 0);
+            transferContext.rotate(Math.PI / 2);
+            transferContext.drawImage(binaryCanvas, 0, 0, physicalHeight, physicalWidth);
+            transferContext.restore();
+        } else {
+            transferContext.drawImage(binaryCanvas, 0, 0, physicalWidth, physicalHeight);
+        }
 
         if (typeof resetQuickEditorOverlay === 'function') {
             resetQuickEditorOverlay(true);
         }
 
-        addLog(`Bắt đầu tải Todo nhị phân ${width}x${height} lên E-Paper...`);
+        addLog(`Bắt đầu tải Todo ${portrait ? "dọc" : "ngang"} ${physicalWidth}x${physicalHeight} lên E-Paper...`);
 
         try {
             if (deviceProtocol === PROTOCOL_NRF52) {
@@ -5718,13 +5793,13 @@ function toggleSwitch(e) {
                 return;
             }
 
-            if (width === 296) {
+            if (physicalWidth === 296) {
                 await sendBufferData(bytesToHex(canvas2bytes_bw(transferCanvas)), 'bw');
                 await sendBufferData(
                     bytesToHex(canvas2bytes_bw(transferCanvas, 'bwr')),
                     'bwr'
                 );
-            } else if (width === 250 || width === 212) {
+            } else if (physicalWidth === 250 || physicalWidth === 212) {
                 await sendBufferData(bytesToHex(canvas2bytes_bw(transferCanvas)), 'bw');
             } else {
                 await sendBufferData(bytesToHex(canvas2bytes(transferCanvas)), 'bw');
@@ -5764,10 +5839,34 @@ function toggleSwitch(e) {
 
         byId('todo-search').addEventListener('input', todoRender);
         byId('todo-filter').addEventListener('change', todoRender);
+        const orientation = byId('todo-orientation');
+        if (orientation) {
+            orientation.value = localStorage.getItem('epd-todo-orientation') || 'portrait';
+            orientation.addEventListener('change', () => {
+                localStorage.setItem('epd-todo-orientation', orientation.value);
+                window.todoRenderPreview();
+            });
+        }
         todoRender();
     });
 })();
 </script>
 
+
+<script id="firmware-ota-script">
+(function(){
+'use strict';
+const el=id=>document.getElementById(id);
+function fwStatus(message){const node=el('fw-status');if(node)node.textContent=message;if(typeof addLog==='function')addLog(message)}
+function modeName(mode){const value=Number(mode)&0x7f;return value===0?'Ảnh':value===1?'Lịch':value===2?'Đồng hồ':value===3?'Mặt đồng hồ 2':value===4?'Đồng hồ + ảnh':`Không xác định (${value})`}
+function panelName(){if(typeof nrf52PanelProfile!=='undefined'&&nrf52PanelProfile===0x21)return '2.13 inch, profile 0x21';if(typeof nrf52ModelId==='undefined')return 'Chưa đọc';if(nrf52ModelId===7)return '7.5 inch UC8179';if(nrf52ModelId===3)return '4.2 inch UC8176 BWR';if(nrf52ModelId===4)return '4.2 inch SSD1619 BW';if(nrf52ModelId===2)return '2.13 hoặc 2.9 inch, model 2';return `Model ${nrf52ModelId}` }
+window.collectFirmwareInfo=function(){return {readAt:new Date().toISOString(),deviceName:(typeof bleDevice!=='undefined'&&bleDevice&&bleDevice.name)||null,deviceId:(typeof bleDevice!=='undefined'&&bleDevice&&bleDevice.id)||null,connected:!!(typeof gattServer!=='undefined'&&gattServer&&gattServer.connected),protocol:typeof deviceProtocol!=='undefined'?deviceProtocol:null,firmwareVersion:typeof nrf52FirmwareVersion!=='undefined'?nrf52FirmwareVersion:null,modelDetected:typeof nrf52ModelDetected!=='undefined'?nrf52ModelDetected:false,modelId:typeof nrf52ModelId!=='undefined'?nrf52ModelId:null,panelProfile:typeof nrf52PanelProfile!=='undefined'?nrf52PanelProfile:null,panel:panelName(),displayMode:typeof nrf52DisplayMode!=='undefined'?nrf52DisplayMode:null,displayModeName:typeof nrf52DisplayMode!=='undefined'?modeName(nrf52DisplayMode):null,imageChunkSize:typeof nrf52ImageChunkSize!=='undefined'?nrf52ImageChunkSize:null}};
+window.readFirmwareInfo=async function(){if(typeof gattServer==='undefined'||!gattServer||!gattServer.connected){fwStatus('Hãy kết nối thiết bị trước.');return}try{if(deviceProtocol===PROTOCOL_NRF52){try{const service=await gattServer.getPrimaryService(NRF52_SERVICE_UUID);const versionChar=await service.getCharacteristic(NRF52_APP_VERSION_UUID);const value=await versionChar.readValue();nrf52FirmwareVersion=value.getUint8(0)}catch(error){fwStatus('Không đọc lại được characteristic phiên bản; dùng dữ liệu đã nhận khi kết nối.')}try{await sendCommand(new Uint8Array([NRF52_CMD_INIT]));await delay(150)}catch(error){}}const info=collectFirmwareInfo();el('fw-device-name').textContent=info.deviceName||'Không có tên';el('fw-protocol').textContent=info.protocol||'Chưa nhận diện';el('fw-version').textContent=info.firmwareVersion===null?'Không được firmware công bố':`v${info.firmwareVersion} (0x${Number(info.firmwareVersion).toString(16).padStart(2,'0').toUpperCase()})`;el('fw-model').textContent=info.modelDetected?`Model ${info.modelId}`:'Chưa nhận phản hồi model';el('fw-panel').textContent=info.panel;el('fw-mode').textContent=info.displayModeName||'Chưa đọc';fwStatus('Đã đọc thông tin firmware qua BLE.')}catch(error){fwStatus('Lỗi đọc firmware: '+(error.message||error))}};
+window.exportFirmwareInfo=function(){const info=collectFirmwareInfo();const blob=new Blob([JSON.stringify(info,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`epd-firmware-info-${Date.now()}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+window.validateOtaPackage=function(){const input=el('ota-package'),file=input&&input.files&&input.files[0];if(!file){fwStatus('Hãy chọn gói DFU .zip.');return false}el('ota-name').textContent=file.name;el('ota-size').textContent=new Intl.NumberFormat('vi-VN').format(file.size)+' byte';if(!file.name.toLowerCase().endsWith('.zip')){fwStatus('Tệp không phải gói ZIP.');return false}if(file.size<500){fwStatus('Gói ZIP quá nhỏ và có thể không hợp lệ.');return false}if(file.size>2*1024*1024){fwStatus('Gói ZIP lớn bất thường đối với nRF52. Hãy kiểm tra lại.');return false}fwStatus('Đã kiểm tra tên và kích thước gói ZIP. Trình duyệt chưa xác minh chữ ký hoặc độ tương thích MCU; bootloader sẽ quyết định khi cập nhật.');return true};
+window.enterDfuMode=async function(){if(!validateOtaPackage())return;if(typeof gattServer==='undefined'||!gattServer||!gattServer.connected){fwStatus('Hãy kết nối thiết bị trước khi vào DFU.');return}if(deviceProtocol!==PROTOCOL_NRF52){fwStatus('Nút DFU này chỉ dành cho nRF52 buttonless Secure DFU.');return}if(!confirm('Thiết bị sẽ ngắt kết nối và khởi động vào DFU. Tiếp tục?'))return;try{fwStatus('Đang yêu cầu thiết bị chuyển sang bootloader DFU...');const service=await gattServer.getPrimaryService(NRF52_BUTTONLESS_DFU_SERVICE_UUID);const characteristic=await service.getCharacteristic(NRF52_BUTTONLESS_DFU_CHAR_UUID);try{await characteristic.startNotifications()}catch(error){}await characteristic.writeValueWithResponse(new Uint8Array([0x01]));fwStatus('Đã gửi lệnh vào DFU. Thiết bị sẽ ngắt kết nối. Mở Nordic nRF Connect Device Manager, quét thiết bị DFU và chọn gói ZIP vừa kiểm tra.')}catch(error){fwStatus('Không thể vào DFU: '+(error.message||error)+'\nFirmware có thể chưa bật ble_dfu_buttonless hoặc UUID DFU không khả dụng.')}};
+document.addEventListener('DOMContentLoaded',()=>{const input=el('ota-package');if(input)input.addEventListener('change',()=>{const file=input.files&&input.files[0];el('ota-name').textContent=file?file.name:'Chưa chọn';el('ota-size').textContent=file?new Intl.NumberFormat('vi-VN').format(file.size)+' byte':'0 byte'})});
+})();
+</script>
 </body>
 </html>
