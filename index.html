@@ -5346,22 +5346,426 @@ function toggleSwitch(e) {
 </script>
 
 <script id="todo-module-script">
-(function(){
-'use strict';
-const KEY='epd-todo-v1',P=['Thấp','Bình thường','Cao','Khẩn cấp'];
-let items=[];
-try{items=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(items))items=[]}catch(e){items=[]}
-const q=id=>document.getElementById(id),now=()=>Math.floor(Date.now()/1000);
-function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
-function overdue(t){return !t.done&&t.due&&t.due<now()}
-function dateValue(v){return v?Math.floor(new Date(v+'T23:59:59').getTime()/1000):0}
-function filtered(){const text=(q('todo-search').value||'').trim().toLowerCase(),f=q('todo-filter').value;return items.filter(t=>t.title.toLowerCase().includes(text)).filter(t=>f==='all'||f==='done'&&t.done||f==='pending'&&!t.done||f==='overdue'&&overdue(t)).sort((a,b)=>Number(a.done)-Number(b.done)||b.priority-a.priority||(a.due||2147483647)-(b.due||2147483647))}
-function render(){if(!q('todo-list'))return;const list=q('todo-list'),shown=filtered();list.innerHTML=shown.length?'':'<div class="todo-empty">Chưa có công việc.</div>';shown.forEach(t=>{const row=document.createElement('div');row.className='todo-row'+(t.done?' done':'');row.innerHTML='<input class="todo-check" type="checkbox" '+(t.done?'checked':'')+'><div><div class="todo-title"></div><div class="todo-meta"></div></div><div class="todo-actions"><button type="button" class="secondary todo-edit">Sửa</button><button type="button" class="danger todo-delete">Xóa</button></div>';row.querySelector('.todo-title').textContent=t.title;row.querySelector('.todo-meta').textContent=P[t.priority]+(t.due?' · '+new Date(t.due*1000).toLocaleDateString('vi-VN'):'')+(overdue(t)?' · QUÁ HẠN':'');row.querySelector('.todo-check').onchange=()=>{t.done=!t.done;save()};row.querySelector('.todo-delete').onclick=()=>{items=items.filter(x=>x.id!==t.id);save()};row.querySelector('.todo-edit').onclick=()=>{const title=prompt('Nội dung công việc:',t.title);if(title!==null&&title.trim()){t.title=title.trim().slice(0,64);save()}};list.appendChild(row)});const done=items.filter(t=>t.done).length;q('todo-total').textContent=items.length;q('todo-done').textContent=done;q('todo-pending').textContent=items.length-done;q('todo-overdue').textContent=items.filter(overdue).length;todoRenderPreview()}
-window.todoClearAll=function(){if(confirm('Xóa toàn bộ Todo?')){items=[];save()}};
-function targetSize(){if(typeof nrf52ModelDetected!=='undefined'&&nrf52ModelDetected){if(nrf52ModelId===7)return[800,480];if(nrf52ModelId===3||nrf52ModelId===4)return[400,300];if(nrf52PanelProfile===0x21)return[250,128]}const sel=q('screen-size'),v=sel?sel.value:'';if(v.includes('7.5'))return[800,480];if(v.includes('4.2'))return[400,300];if(v.includes('2.9'))return[296,128];return[250,128]}
-window.todoRenderPreview=function(){const c=q('todo-preview');if(!c)return;const [w,h]=targetSize();c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#000';const compact=h<=144,margin=Math.max(8,Math.round(w*.035)),header=compact?20:Math.round(h*.12),font=compact?12:Math.max(15,Math.round(h*.052));x.font='bold '+(compact?18:Math.round(h*.075))+'px Arial';x.fillText('TODO',margin,header);x.font=(compact?10:Math.round(font*.7))+'px Arial';x.textAlign='right';x.fillText(items.filter(t=>!t.done).length+' pending · '+items.filter(t=>t.done).length+' done',w-margin,header);x.textAlign='left';x.beginPath();x.moveTo(margin,header+7);x.lineTo(w-margin,header+7);x.stroke();const start=header+(compact?25:35),rowH=compact?20:Math.max(25,Math.floor((h-start-margin)/Math.min(8,Math.max(1,items.length))));filtered().slice(0,compact?4:8).forEach((t,i)=>{const y=start+i*rowH;x.strokeRect(margin,y-font*.72,font*.62,font*.62);if(t.done){x.beginPath();x.moveTo(margin+2,y-font*.35);x.lineTo(margin+font*.25,y);x.lineTo(margin+font*.6,y-font*.7);x.stroke()}x.font=(t.priority>=2?'bold ':'')+font+'px Arial';let txt=(t.priority===3?'!!! ':t.priority===2?'!! ':'')+t.title;const date=t.due?new Date(t.due*1000).toLocaleDateString('vi-VN'):'';const limit=w-margin*2-font-(date?75:8);while(x.measureText(txt).width>limit&&txt.length>4)txt=txt.slice(0,-2)+'…';x.fillText(txt,margin+font,y);if(date){x.font=Math.max(9,Math.round(font*.62))+'px Arial';x.textAlign='right';x.fillText(date,w-margin,y);x.textAlign='left'}})};
-window.todoUploadToEpaper=async function(){const preview=q('todo-preview'),canvas=q('canvas');if(!preview||!canvas)return;const [w,h]=targetSize(),select=q('screen-size');const preferred=w===800?'nrf52_7.5_800x480':w===400?(nrf52ModelId===4?'nrf52_4.2_400x300_bw1619':'nrf52_4.2_400x300'):w===296?'nrf52_2.9_296x128':'nrf52_2.13_250x128';if(select){select.value=preferred;updateCanvasSize()}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(preview,0,0,w,h);resetQuickEditorOverlay(true);if(!deviceProtocol){addLog('Hãy kết nối thiết bị trước khi tải Todo.');return}addLog('Bắt đầu tải Todo lên E-Paper...');await upload_image()};
-document.addEventListener('DOMContentLoaded',()=>{q('todo-add-form').addEventListener('submit',e=>{e.preventDefault();const title=q('todo-title-input').value.trim();if(!title)return;items.push({id:Date.now(),title:title.slice(0,64),priority:+q('todo-priority-input').value,due:dateValue(q('todo-due-input').value),done:false,created:now()});e.target.reset();q('todo-priority-input').value='1';save()});q('todo-search').addEventListener('input',render);q('todo-filter').addEventListener('change',render);render()});
+(function () {
+    'use strict';
+
+    const TODO_STORAGE_KEY = 'epd-todo-v2';
+    const PRIORITY_NAMES = ['Thấp', 'Bình thường', 'Cao', 'Khẩn cấp'];
+    let todoItems = [];
+
+    try {
+        const saved = JSON.parse(localStorage.getItem(TODO_STORAGE_KEY) || '[]');
+        todoItems = Array.isArray(saved) ? saved : [];
+    } catch (error) {
+        todoItems = [];
+    }
+
+    const byId = id => document.getElementById(id);
+    const unixNow = () => Math.floor(Date.now() / 1000);
+
+    function todoSave() {
+        localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
+        todoRender();
+    }
+
+    function todoIsOverdue(item) {
+        return !item.done && item.due > 0 && item.due < unixNow();
+    }
+
+    function todoDateToUnix(value) {
+        return value
+            ? Math.floor(new Date(value + 'T23:59:59').getTime() / 1000)
+            : 0;
+    }
+
+    function todoVisibleItems() {
+        const search = (byId('todo-search').value || '').trim().toLowerCase();
+        const filter = byId('todo-filter').value;
+
+        return todoItems
+            .filter(item => item.title.toLowerCase().includes(search))
+            .filter(item =>
+                filter === 'all' ||
+                (filter === 'done' && item.done) ||
+                (filter === 'pending' && !item.done) ||
+                (filter === 'overdue' && todoIsOverdue(item))
+            )
+            .sort((a, b) =>
+                Number(a.done) - Number(b.done) ||
+                b.priority - a.priority ||
+                (a.due || 2147483647) - (b.due || 2147483647)
+            );
+    }
+
+    function todoRender() {
+        const list = byId('todo-list');
+        if (!list) return;
+
+        const visibleItems = todoVisibleItems();
+        list.innerHTML = visibleItems.length
+            ? ''
+            : '<div class="todo-empty">Chưa có công việc.</div>';
+
+        visibleItems.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'todo-row' + (item.done ? ' done' : '');
+            row.innerHTML = `
+                <input class="todo-check" type="checkbox" ${item.done ? 'checked' : ''}>
+                <div>
+                    <div class="todo-title"></div>
+                    <div class="todo-meta"></div>
+                </div>
+                <div class="todo-actions">
+                    <button type="button" class="secondary todo-edit">Sửa</button>
+                    <button type="button" class="danger todo-delete">Xóa</button>
+                </div>`;
+
+            row.querySelector('.todo-title').textContent = item.title;
+            row.querySelector('.todo-meta').textContent =
+                PRIORITY_NAMES[item.priority] +
+                (item.due
+                    ? ' · ' + new Date(item.due * 1000).toLocaleDateString('vi-VN')
+                    : '') +
+                (todoIsOverdue(item) ? ' · QUÁ HẠN' : '');
+
+            row.querySelector('.todo-check').addEventListener('change', () => {
+                item.done = !item.done;
+                todoSave();
+            });
+
+            row.querySelector('.todo-delete').addEventListener('click', () => {
+                todoItems = todoItems.filter(candidate => candidate.id !== item.id);
+                todoSave();
+            });
+
+            row.querySelector('.todo-edit').addEventListener('click', () => {
+                const title = prompt('Nội dung công việc:', item.title);
+                if (title !== null && title.trim()) {
+                    item.title = title.trim().slice(0, 64);
+                    todoSave();
+                }
+            });
+
+            list.appendChild(row);
+        });
+
+        const completed = todoItems.filter(item => item.done).length;
+        byId('todo-total').textContent = todoItems.length;
+        byId('todo-done').textContent = completed;
+        byId('todo-pending').textContent = todoItems.length - completed;
+        byId('todo-overdue').textContent = todoItems.filter(todoIsOverdue).length;
+        window.todoRenderPreview();
+    }
+
+    window.todoClearAll = function () {
+        if (confirm('Xóa toàn bộ Todo?')) {
+            todoItems = [];
+            todoSave();
+        }
+    };
+
+    function todoTargetSize() {
+        if (typeof nrf52ModelDetected !== 'undefined' && nrf52ModelDetected) {
+            if (nrf52ModelId === 7) return [800, 480];
+            if (nrf52ModelId === 3 || nrf52ModelId === 4) return [400, 300];
+            if (nrf52PanelProfile === 0x21) return [250, 128];
+        }
+
+        const selector = byId('screen-size');
+        const value = selector ? selector.value : '';
+        if (value.includes('7.5')) return [800, 480];
+        if (value.includes('4.2')) return [400, 300];
+        if (value.includes('2.9')) return [296, 128];
+        return [250, 128];
+    }
+
+    function fitTodoText(context, text, maxWidth, weight, initialSize) {
+        let size = initialSize;
+        context.font = `${weight} ${size}px Arial, "Segoe UI", sans-serif`;
+        while (size > 10 && context.measureText(text).width > maxWidth) {
+            size -= 1;
+            context.font = `${weight} ${size}px Arial, "Segoe UI", sans-serif`;
+        }
+        if (context.measureText(text).width <= maxWidth) return text;
+        let result = text;
+        while (result.length > 2 && context.measureText(result + '…').width > maxWidth) {
+            result = result.slice(0, -1);
+        }
+        return result + '…';
+    }
+
+    window.todoRenderPreview = function () {
+        const canvas = byId('todo-preview');
+        if (!canvas) return;
+
+        const [width, height] = todoTargetSize();
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext('2d', {
+            alpha: false,
+            willReadFrequently: true
+        });
+        context.imageSmoothingEnabled = false;
+        context.textRendering = 'geometricPrecision';
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, width, height);
+        context.fillStyle = '#000000';
+        context.strokeStyle = '#000000';
+
+        const compact = height <= 144;
+        const margin = compact ? 8 : Math.max(14, Math.round(width * 0.035));
+        const headerY = compact ? 20 : Math.round(height * 0.12);
+        const titleSize = compact ? 18 : Math.max(22, Math.round(height * 0.075));
+        const taskFontSize = compact ? 14 : Math.max(18, Math.round(height * 0.055));
+        const maximumRows = compact ? 4 : (height <= 300 ? 7 : 10);
+
+        context.font = `800 ${titleSize}px Arial, "Segoe UI", sans-serif`;
+        context.textBaseline = 'alphabetic';
+        context.fillText('TODO', margin, headerY);
+
+        const pending = todoItems.filter(item => !item.done).length;
+        const completed = todoItems.filter(item => item.done).length;
+        context.font = `700 ${compact ? 10 : Math.max(12, Math.round(taskFontSize * 0.7))}px Arial, sans-serif`;
+        context.textAlign = 'right';
+        context.fillText(`${pending} chờ · ${completed} xong`, width - margin, headerY);
+        context.textAlign = 'left';
+
+        const dividerY = Math.round(headerY + (compact ? 5 : 9)) + 0.5;
+        context.lineWidth = compact ? 1 : 2;
+        context.beginPath();
+        context.moveTo(margin, dividerY);
+        context.lineTo(width - margin, dividerY);
+        context.stroke();
+
+        const startY = headerY + (compact ? 27 : 42);
+        const availableHeight = height - startY - margin;
+        const rowHeight = Math.max(
+            compact ? 23 : 30,
+            Math.floor(availableHeight / maximumRows)
+        );
+
+        todoVisibleItems().slice(0, maximumRows).forEach((item, index) => {
+            const baselineY = Math.round(startY + index * rowHeight);
+            const boxSize = compact ? 11 : Math.max(13, Math.round(taskFontSize * 0.68));
+            const boxX = margin;
+            const boxY = Math.round(baselineY - boxSize * 0.78);
+
+            context.lineWidth = compact ? 2 : 2;
+            context.strokeRect(boxX + 0.5, boxY + 0.5, boxSize, boxSize);
+
+            if (item.done) {
+                context.lineWidth = compact ? 2 : 3;
+                context.beginPath();
+                context.moveTo(Math.round(boxX + 2), Math.round(boxY + boxSize * 0.55));
+                context.lineTo(Math.round(boxX + boxSize * 0.4), Math.round(boxY + boxSize - 2));
+                context.lineTo(Math.round(boxX + boxSize - 1), Math.round(boxY + 1));
+                context.stroke();
+            }
+
+            const prefix = item.priority === 3 ? '!!! ' : item.priority === 2 ? '!! ' : '';
+            const dateText = item.due
+                ? new Date(item.due * 1000).toLocaleDateString('vi-VN')
+                : '';
+            const textX = boxX + boxSize + (compact ? 7 : 10);
+            const dateReserved = dateText ? (compact ? 58 : 82) : 0;
+            const maxTextWidth = width - margin - textX - dateReserved;
+            const weight = item.priority >= 2 ? 800 : 700;
+            const displayText = fitTodoText(
+                context,
+                prefix + item.title,
+                maxTextWidth,
+                weight,
+                taskFontSize
+            );
+
+            context.fillStyle = '#000000';
+            context.fillText(displayText, Math.round(textX), baselineY);
+
+            if (dateText) {
+                context.font = `700 ${compact ? 9 : Math.max(11, Math.round(taskFontSize * 0.62))}px Arial, sans-serif`;
+                context.textAlign = 'right';
+                context.fillText(dateText, width - margin, baselineY);
+                context.textAlign = 'left';
+            }
+        });
+    };
+
+    function todoBinarizeCanvas(sourceCanvas, options = {}) {
+        const threshold = options.threshold ?? 205;
+        const bolden = options.bolden ?? 1;
+        const output = document.createElement('canvas');
+        output.width = sourceCanvas.width;
+        output.height = sourceCanvas.height;
+
+        const context = output.getContext('2d', {
+            alpha: false,
+            willReadFrequently: true
+        });
+        context.imageSmoothingEnabled = false;
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, output.width, output.height);
+        context.drawImage(sourceCanvas, 0, 0);
+
+        const image = context.getImageData(0, 0, output.width, output.height);
+        const pixels = image.data;
+        const width = output.width;
+        const height = output.height;
+        const blackMask = new Uint8Array(width * height);
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const pixelIndex = (y * width + x) * 4;
+                const luminance =
+                    pixels[pixelIndex] * 0.299 +
+                    pixels[pixelIndex + 1] * 0.587 +
+                    pixels[pixelIndex + 2] * 0.114;
+                if (luminance < threshold) blackMask[y * width + x] = 1;
+            }
+        }
+
+        if (bolden > 0) {
+            const sourceMask = blackMask.slice();
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (!sourceMask[y * width + x]) continue;
+                    for (let dy = -bolden; dy <= bolden; dy++) {
+                        for (let dx = -bolden; dx <= bolden; dx++) {
+                            if (Math.abs(dx) + Math.abs(dy) > bolden) continue;
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                blackMask[ny * width + nx] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const pixelIndex = (y * width + x) * 4;
+                const value = blackMask[y * width + x] ? 0 : 255;
+                pixels[pixelIndex] = value;
+                pixels[pixelIndex + 1] = value;
+                pixels[pixelIndex + 2] = value;
+                pixels[pixelIndex + 3] = 255;
+            }
+        }
+
+        context.putImageData(image, 0, 0);
+        return output;
+    }
+
+    function todoScreenMode(width) {
+        if (width === 800) return 'nrf52_7.5_800x480';
+        if (width === 400) {
+            return (typeof nrf52ModelId !== 'undefined' && nrf52ModelId === 4)
+                ? 'nrf52_4.2_400x300_bw1619'
+                : 'nrf52_4.2_400x300';
+        }
+        if (width === 296) return 'nrf52_2.9_296x128';
+        return 'nrf52_2.13_250x128';
+    }
+
+    window.todoUploadToEpaper = async function () {
+        const previewCanvas = byId('todo-preview');
+        const transferCanvas = byId('canvas');
+        const screenSelector = byId('screen-size');
+
+        if (!previewCanvas || !transferCanvas) {
+            addLog('Không tìm thấy Canvas Todo hoặc Canvas truyền ảnh.');
+            return;
+        }
+        if (!deviceProtocol) {
+            addLog('Hãy kết nối thiết bị trước khi tải Todo.');
+            return;
+        }
+
+        const [width, height] = todoTargetSize();
+        if (screenSelector) screenSelector.value = todoScreenMode(width);
+
+        window.todoRenderPreview();
+        const binaryCanvas = todoBinarizeCanvas(previewCanvas, {
+            threshold: height <= 144 ? 215 : 200,
+            bolden: height <= 144 ? 1 : 0
+        });
+
+        transferCanvas.width = width;
+        transferCanvas.height = height;
+        const transferContext = transferCanvas.getContext('2d', {
+            alpha: false,
+            willReadFrequently: true
+        });
+        transferContext.imageSmoothingEnabled = false;
+        transferContext.fillStyle = '#ffffff';
+        transferContext.fillRect(0, 0, width, height);
+        transferContext.drawImage(binaryCanvas, 0, 0, width, height);
+
+        if (typeof resetQuickEditorOverlay === 'function') {
+            resetQuickEditorOverlay(true);
+        }
+
+        addLog(`Bắt đầu tải Todo nhị phân ${width}x${height} lên E-Paper...`);
+
+        try {
+            if (deviceProtocol === PROTOCOL_NRF52) {
+                const success = await uploadNrf52Image(transferCanvas);
+                addLog(success
+                    ? 'Đã tải Todo bằng chế độ chữ đen trắng tối ưu.'
+                    : 'Thiết bị từ chối dữ liệu Todo.');
+                return;
+            }
+
+            if (width === 296) {
+                await sendBufferData(bytesToHex(canvas2bytes_bw(transferCanvas)), 'bw');
+                await sendBufferData(
+                    bytesToHex(canvas2bytes_bw(transferCanvas, 'bwr')),
+                    'bwr'
+                );
+            } else if (width === 250 || width === 212) {
+                await sendBufferData(bytesToHex(canvas2bytes_bw(transferCanvas)), 'bw');
+            } else {
+                await sendBufferData(bytesToHex(canvas2bytes(transferCanvas)), 'bw');
+                await sendBufferData(bytesToHex(canvas2bytes(transferCanvas, 'bwr')), 'bwr');
+            }
+
+            await delay(300);
+            await sendCommand(hexToBytes('01'));
+            addLog('Đã tải Todo lên thiết bị.');
+        } catch (error) {
+            addLog('Lỗi tải Todo: ' + (error.message || String(error)));
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = byId('todo-add-form');
+        if (!form) return;
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            const title = byId('todo-title-input').value.trim();
+            if (!title) return;
+
+            todoItems.push({
+                id: Date.now(),
+                title: title.slice(0, 64),
+                priority: Number(byId('todo-priority-input').value),
+                due: todoDateToUnix(byId('todo-due-input').value),
+                done: false,
+                created: unixNow()
+            });
+
+            form.reset();
+            byId('todo-priority-input').value = '1';
+            todoSave();
+        });
+
+        byId('todo-search').addEventListener('input', todoRender);
+        byId('todo-filter').addEventListener('change', todoRender);
+        todoRender();
+    });
 })();
 </script>
 
