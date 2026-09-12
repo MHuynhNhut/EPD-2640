@@ -5516,19 +5516,19 @@ function toggleSwitch(e) {
         const compact = height <= 144;
         const margin = compact ? 8 : Math.max(14, Math.round(width * 0.035));
         const headerY = compact ? 20 : Math.round(height * 0.12);
-        const titleSize = compact ? 18 : Math.max(22, Math.round(height * 0.075));
-        const taskFontSize = compact ? 14 : Math.max(18, Math.round(height * 0.055));
+        const titleSize = compact ? 16 : Math.max(20, Math.round(height * 0.068));
+        const taskFontSize = compact ? 13 : Math.max(17, Math.round(height * 0.052));
         const maximumRows = compact ? 4 : (height <= 300 ? 7 : 10);
 
-        context.font = `800 ${titleSize}px Arial, "Segoe UI", sans-serif`;
+        context.font = `700 ${titleSize}px Arial, "Segoe UI", sans-serif`;
         context.textBaseline = 'alphabetic';
         context.fillText('TODO', margin, headerY);
 
         const pending = todoItems.filter(item => !item.done).length;
         const completed = todoItems.filter(item => item.done).length;
-        context.font = `700 ${compact ? 10 : Math.max(12, Math.round(taskFontSize * 0.7))}px Arial, sans-serif`;
+        context.font = `600 ${compact ? 9 : Math.max(11, Math.round(taskFontSize * 0.65))}px Arial, sans-serif`;
         context.textAlign = 'right';
-        context.fillText(`${pending} chờ · ${completed} xong`, width - margin, headerY);
+        context.fillText(`${pending} PENDING | ${completed} DONE`, width - margin, headerY);
         context.textAlign = 'left';
 
         const dividerY = Math.round(headerY + (compact ? 5 : 9)) + 0.5;
@@ -5570,7 +5570,7 @@ function toggleSwitch(e) {
             const textX = boxX + boxSize + (compact ? 7 : 10);
             const dateReserved = dateText ? (compact ? 58 : 82) : 0;
             const maxTextWidth = width - margin - textX - dateReserved;
-            const weight = item.priority >= 2 ? 800 : 700;
+            const weight = item.priority >= 2 ? 700 : 600;
             const displayText = fitTodoText(
                 context,
                 prefix + item.title,
@@ -5592,8 +5592,8 @@ function toggleSwitch(e) {
     };
 
     function todoBinarizeCanvas(sourceCanvas, options = {}) {
-        const threshold = options.threshold ?? 205;
-        const bolden = options.bolden ?? 1;
+        const threshold = options.threshold ?? 150;
+        const bolden = options.bolden ?? 0;
         const output = document.createElement('canvas');
         output.width = sourceCanvas.width;
         output.height = sourceCanvas.height;
@@ -5688,8 +5688,8 @@ function toggleSwitch(e) {
 
         window.todoRenderPreview();
         const binaryCanvas = todoBinarizeCanvas(previewCanvas, {
-            threshold: height <= 144 ? 215 : 200,
-            bolden: height <= 144 ? 1 : 0
+            threshold: height <= 144 ? 145 : 155,
+            bolden: 0
         });
 
         transferCanvas.width = width;
